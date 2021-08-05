@@ -1,7 +1,4 @@
-import sqlite3
 from db import db
-
-DB_FILE = "data.db"
 
 
 class UserModel(db.Model):
