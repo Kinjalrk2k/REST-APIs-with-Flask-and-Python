@@ -4,8 +4,6 @@ from flask_jwt import jwt_required
 
 from models.item import ItemModel
 
-DB_FILE = "data.db"
-
 
 class Item(Resource):
     parser = reqparse.RequestParser()
