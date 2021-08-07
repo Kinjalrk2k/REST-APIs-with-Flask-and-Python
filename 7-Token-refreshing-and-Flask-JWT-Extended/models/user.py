@@ -22,7 +22,7 @@ class UserModel(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def save_to_db(self):
+    def delete_from_db(self):
         db.session.delete(self)
         db.session.commit()
 
