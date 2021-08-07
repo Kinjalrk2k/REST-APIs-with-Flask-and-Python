@@ -67,5 +67,14 @@ class Item(Resource):
 
 
 class ItemList(Resource):
+    @jwt_required(optional=True)
     def get(self):
-        return {'items': [x.json() for x in ItemModel.find_all()]}
+        user_id = get_jwt()
+        items = [item.json() for item in ItemModel.find_all()]
+        if user_id:
+            return {'items': items}
+
+        return {
+            'items': [item['name'] for item in items],
+            'message': "More data available if you log in!"
+        }
