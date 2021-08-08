@@ -1,5 +1,5 @@
 from db import db
-from flask import Flask
+from flask import Flask, jsonify
 from flask_restful import Api
 from flask_jwt_extended import JWTManager
 
@@ -15,11 +15,6 @@ app.secret_key = 'asupersecretkeythatnobodyknows'
 api = Api(app)
 
 
-@app.before_first_request
-def create_tables():
-    db.create_all()
-
-
 jwt = JWTManager(app)
 
 
@@ -28,6 +23,51 @@ def add_claims_to_jwt(identity):
     if identity == 1:
         return {'is_admin': True}
     return {'is_admin': False}
+
+
+@jwt.expired_token_loader
+def expired_token_callback():
+    return jsonify({
+        'description': 'The token has expired',
+        'error': 'token_expired'
+    }), 401
+
+
+@jwt.invalid_token_loader
+def invalid_token_callback(error):
+    return jsonify({
+        'description': 'Signature verification failed',
+        'error': 'invalid_token'
+    }), 401
+
+
+@jwt.unauthorized_loader
+def missing_token_callback(error):
+    return jsonify({
+        "description": "Request does not contain an access token.",
+        'error': 'authorization_required'
+    }), 401
+
+
+@jwt.needs_fresh_token_loader
+def token_not_fresh_callback():
+    return jsonify({
+        "description": "The token is not fresh.",
+        'error': 'fresh_token_required'
+    }), 401
+
+
+@jwt.revoked_token_loader
+def revoked_token_callback():
+    return jsonify({
+        "description": "The token has been revoked.",
+        'error': 'token_revoked'
+    }), 401
+
+
+@app.before_first_request
+def create_tables():
+    db.create_all()
 
 
 api.add_resource(Store, '/store/<string:name>')
